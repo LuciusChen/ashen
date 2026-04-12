@@ -18,6 +18,12 @@ Add the following to your Emacs init file:
 (add-to-list 'custom-theme-load-path "~/.emacs.d/rose-pine")
 #+END_SRC
 
+Or clone this repo to a custom path
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path "/path/to/rose-pine")
+(add-to-list 'custom-theme-load-path "/path/to/rose-pine")
+#+END_SRC
+
 * Usage
 To activate the theme, use either of the following commands:
 
