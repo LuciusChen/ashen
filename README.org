@@ -18,7 +18,7 @@ Ashen targets Emacs 24.1 or newer.
 ** straight.el (recommended)
 #+BEGIN_SRC emacs-lisp
 (use-package ashen
-  :straight (ashen :host github :repo "LuciusChen/rose-pine")
+  :straight (ashen :host github :repo "LuciusChen/ashen")
   :config
   (load-theme 'ashen-night t))
 #+END_SRC
@@ -27,7 +27,7 @@ Or without =use-package=:
 
 #+BEGIN_SRC emacs-lisp
 (straight-use-package
- '(ashen :host github :repo "LuciusChen/rose-pine"))
+ '(ashen :host github :repo "LuciusChen/ashen"))
 (load-theme 'ashen-night t)
 #+END_SRC
 
@@ -35,7 +35,7 @@ Or without =use-package=:
 Clone the repository and add it to your load path:
 
 #+BEGIN_SRC shell
-git clone https://github.com/LuciusChen/rose-pine.git ~/.emacs.d/ashen
+git clone https://github.com/LuciusChen/ashen.git ~/.emacs.d/ashen
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -102,6 +102,6 @@ palette mechanism is inspired by the Modus themes.
 * License
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 * Contributing
-Contributions are welcome! Feel free to submit issues or pull requests on the GitHub repository: https://github.com/LuciusChen/rose-pine
+Contributions are welcome! Feel free to submit issues or pull requests on the GitHub repository: https://github.com/LuciusChen/ashen
 * Contact
 For any questions or suggestions, contact Lucius at <chenyh572@gmail.com>.

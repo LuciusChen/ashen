@@ -5,7 +5,7 @@
 ;; Author: Steve Purcell <steve@sanityinc.com>
 ;; Adapted by: Lucius <chenyh572@gmail.com>
 ;; Keywords: faces themes
-;; Homepage: https://github.com/LuciusChen/rose-pine
+;; Homepage: https://github.com/LuciusChen/ashen
 ;; Package-Requires: ((emacs "24.1"))
 ;; Version: 0
 
