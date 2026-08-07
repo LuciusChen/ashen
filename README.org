@@ -1,56 +1,107 @@
 * Introduction
-This theme, "Rosé Pine for Emacs", is designed for use with Emacs' built-in theme support in Emacs 24 or later. It provides a color palette inspired by the Rosé Pine theme, offering a soothing and aesthetically pleasing experience for your coding environment.
+Ashen is a personal, low-saturation color theme for Emacs, evolved from a
+fork of the Rosé Pine port.  It provides two variants:
+
+- =ashen-night=: dark theme with a charcoal base, dusty rose, gold,
+  periwinkle and lilac accents.
+- =ashen-day=: light theme with a warm white base, teal-gray text and
+  dusty rose accents.
+
+The palette is defined in terms of semantic color keys and can be
+overridden at runtime, so you can adjust the theme to your taste without
+editing the source.
 
 [[./screenshot][Screenshots]]
 * Installation
-To use Rosé Pine, ensure you have Emacs version 24.1 or newer. You can install the theme from MELPA or directly from the repository.
+Ashen targets Emacs 24.1 or newer.
 
-** Manual Installation
-Clone the repository and add it to your `load-path`:
+** straight.el (recommended)
+#+BEGIN_SRC emacs-lisp
+(use-package ashen
+  :straight (ashen :host github :repo "LuciusChen/rose-pine")
+  :config
+  (load-theme 'ashen-night t))
+#+END_SRC
+
+Or without =use-package=:
+
+#+BEGIN_SRC emacs-lisp
+(straight-use-package
+ '(ashen :host github :repo "LuciusChen/rose-pine"))
+(load-theme 'ashen-night t)
+#+END_SRC
+
+** Manual installation
+Clone the repository and add it to your load path:
 
 #+BEGIN_SRC shell
-git clone https://github.com/LuciusChen/rose-pine.git ~/.emacs.d/rose-pine
+git clone https://github.com/LuciusChen/rose-pine.git ~/.emacs.d/ashen
 #+END_SRC
-
-Add the following to your Emacs init file:
 
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'custom-theme-load-path "~/.emacs.d/rose-pine")
+(add-to-list 'load-path "~/.emacs.d/ashen")
+(add-to-list 'custom-theme-load-path "~/.emacs.d/ashen")
 #+END_SRC
-
-Or clone this repo to a custom path
-#+BEGIN_SRC emacs-lisp
-(add-to-list 'load-path "/path/to/rose-pine")
-(add-to-list 'custom-theme-load-path "/path/to/rose-pine")
-#+END_SRC
-
 * Usage
-To activate the theme, use either of the following commands:
+Activate a theme with:
+
+M-x load-theme RET ashen-night RET
+
+M-x load-theme RET ashen-day RET
+
+Or programmatically:
 
 #+BEGIN_SRC emacs-lisp
-M-x load-theme RET rose-pine-night RET
-M-x load-theme RET rose-pine-day RET
+(load-theme 'ashen-night t)
 #+END_SRC
-
-Alternatively, you can programmatically enable the theme in your configuration:
-
-#+BEGIN_SRC emacs-lisp
-(load-theme 'rose-pine-night t)
-#+END_SRC
-
 * Customization
-Rosé Pine provides two variants:
-- =rose-pine-night=: A dark theme suitable for low-light environments.
-- =rose-pine-day=: A light theme ideal for bright conditions.
+Each variant has its own palette.  The main semantic keys are:
 
+- =background=, =alt-background=, =current-line=, =selection=
+- =foreground=, =comment=
+- =rose=, =gold=, =love=, =amber=, =leaf=, =foam=, =pine=, =iris=
+
+as well as the diff colors =bg-added=, =bg-changed=, =bg-removed= and
+their =*-faint= / =*-refine= / =fg-*= companions.
+
+Override the palette with the following options:
+
+- =ashen-common-palette-overrides=: applied to both variants.
+- =ashen-night-palette-overrides=: applied to =ashen-night= only.
+- =ashen-day-palette-overrides=: applied to =ashen-day= only.
+
+Each override is an alist of (KEY . VALUE).  VALUE is either a color
+string like ="#000000"= or another palette key (a symbol) whose color
+should be reused.  Per-variant overrides take precedence over common
+ones.
+
+#+BEGIN_SRC emacs-lisp
+;; Make the night background pure black.
+(setopt ashen-night-palette-overrides '((background . "#000000")))
+
+;; Use the foreground color for comments in both variants.
+(setopt ashen-common-palette-overrides '((comment . foreground)))
+
+;; Swap the night rose accent with the love accent.
+(setopt ashen-night-palette-overrides '((rose . love)))
+#+END_SRC
+
+After changing an override, reload the theme for it to take effect:
+
+M-x load-theme RET ashen-night RET
+
+Inspect the effective palette at any time with:
+
+M-x ashen-palette RET night
+
+M-x ashen-palette RET day
 * Credits
-The original color selection was inspired by the Rosé Pine palette: https://rosepinetheme.com/palette/ingredients/
-
+The original color selection was inspired by the Rosé Pine palette:
+https://rosepinetheme.com/palette/ingredients/.  The overridable
+palette mechanism is inspired by the Modus themes.
 * License
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
 * Contributing
 Contributions are welcome! Feel free to submit issues or pull requests on the GitHub repository: https://github.com/LuciusChen/rose-pine
-
 * Contact
 For any questions or suggestions, contact Lucius at <chenyh572@gmail.com>.

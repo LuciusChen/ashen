@@ -1,4 +1,4 @@
-;;; rose-pine.el --- Rosé Pine for Emacs  -*- lexical-binding: t -*-
+;;; ashen.el --- Ashen for Emacs  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2012-2017 Steve Purcell
 
@@ -24,7 +24,7 @@
 
 ;;; Commentary:
 
-;; This theme, "Rosé Pine for Emacs", is designed for use with Emacs'
+;; This theme, "Ashen for Emacs", is designed for use with Emacs'
 ;; built-in theme support in Emacs 24. It provides a colour palette
 ;; inspired by the Rosé Pine theme (https://rosepinetheme.com/palette/ingredients/).
 
@@ -34,7 +34,7 @@
 ;; or use customize-themes' to select a theme interactively.
 
 ;; Alternatively, use the provided command to activate the theme:
-;;     M-x load-theme RET rose-pine RET
+;;     M-x load-theme RET ashen RET
 ;;
 ;;; Credit:
 
@@ -47,23 +47,51 @@
 
 (eval-when-compile (require 'ansi-color))
 
-(defun rose-pine--interpolate (hex1 hex2 gradations which)
+(defgroup ashen ()
+  "Personal color theme with an overridable palette."
+  :group 'faces
+  :prefix "ashen-")
+
+(defcustom ashen-common-palette-overrides nil
+  "Alist of palette entries overridden in every Ashen theme.
+Each element is (KEY . VALUE), where KEY is a palette key such as
+`background' or `rose', and VALUE is either a color string
+\(\"#rrggbb\") or another palette key (a symbol) whose value should
+be reused.  Per-theme overrides take precedence over this one."
+  :type '(alist :key-type symbol :value-type (choice string symbol))
+  :group 'ashen)
+
+(defcustom ashen-night-palette-overrides nil
+  "Alist of palette entries overridden in the `ashen-night' theme.
+See `ashen-common-palette-overrides' for the format.  Entries here
+take precedence over common overrides."
+  :type '(alist :key-type symbol :value-type (choice string symbol))
+  :group 'ashen)
+
+(defcustom ashen-day-palette-overrides nil
+  "Alist of palette entries overridden in the `ashen-day' theme.
+See `ashen-common-palette-overrides' for the format.  Entries here
+take precedence over common overrides."
+  :type '(alist :key-type symbol :value-type (choice string symbol))
+  :group 'ashen)
+
+(defun ashen--interpolate (hex1 hex2 gradations which)
   (let ((c1 (color-name-to-rgb hex1))
         (c2 (color-name-to-rgb hex2)))
     (apply 'color-rgb-to-hex (nth which (color-gradient c1 c2 gradations)))))
 
-(defun rose-pine--alt-background (background highlight)
+(defun ashen--alt-background (background highlight)
   "Calculate the alt-background color by blending BACKGROUND and HIGHLIGHT.
 This cannot be done at runtime because its output is dependent
 upon the display characteristics of the frame in which it is
 executed."
-  (rose-pine--interpolate background highlight 7 3))
+  (ashen--interpolate background highlight 7 3))
 
-(defconst rose-pine-colors
+(defconst ashen-colors
   '((night . ((background     . "#1a1b1b")
-              (alt-background . "#323740")
-              (current-line   . "#26282e")
-              (selection      . "#3D4252")
+              (alt-background . "#2e323a")
+              (current-line   . "#222328")
+              (selection      . "#393d4c")
               (foreground     . "#e3dfcb")
               (comment        . "#868087")
               (rose           . "#d4a5a5")
@@ -92,10 +120,10 @@ executed."
               (bg-removed-refine  . "#781a3a")
               (fg-removed         . "#ffbfbf")
               (fg-removed-intense . "#ff9095")))
-    (day . ((background     . "#faf4ed")
-            (alt-background . "#e7e3e0")
-            (current-line   . "#f4ede8")
-            (selection      . "#dfdad9")
+    (day . ((background     . "#fffaf3")
+            (alt-background . "#ece9e6")
+            (current-line   . "#f9f3ee")
+            (selection      . "#e4e0df")
             (foreground     . "#34494a")
             (comment        . "#8e908c")
             (rose           . "#b08585")
@@ -125,15 +153,52 @@ executed."
             (fg-removed         . "#8f1313")
             (fg-removed-intense . "#aa2222")))))
 
-(defmacro rose-pine--with-colors (mode &rest body)
+(defun ashen--palette (mode)
+  "Return the effective palette for MODE (`night' or `day').
+The result is the base palette from `ashen-colors' with
+`ashen-common-palette-overrides' and the MODE-specific override
+variable applied.  An override value that is a symbol refers to
+another key in the resulting palette."
+  (let* ((base (or (assq mode ashen-colors)
+                   (error "no such theme flavor")))
+         (result (copy-sequence (cdr base)))
+         (overrides (append ashen-common-palette-overrides
+                            (pcase mode
+                              ('night ashen-night-palette-overrides)
+                              ('day ashen-day-palette-overrides)))))
+    (dolist (entry overrides result)
+      (let* ((key (car entry))
+             (value (cdr entry))
+             (resolved (if (stringp value)
+                           value
+                         (or (cdr (assq value result))
+                             (error "Unknown Ashen palette key `%S' referenced by override for `%S'"
+                                    value key)))))
+        (setq result (cons (cons key resolved)
+                           (assq-delete-all key result)))))))
+
+(defun ashen-palette (mode)
+  "Return the effective Ashen palette for MODE (`night' or `day').
+Interactively, display it in a help buffer."
+  (interactive
+   (list (intern (completing-read "Ashen variant: " '("night" "day") nil t))))
+  (let ((palette (ashen--palette mode)))
+    (if (called-interactively-p 'interactive)
+        (with-help-window "*Ashen palette*"
+          (with-current-buffer "*Ashen palette*"
+            (insert (format "Ashen %s palette\n\n" mode))
+            (dolist (entry palette)
+              (insert (format "%-20s %s\n" (car entry) (cdr entry))))))
+      palette)))
+
+(defmacro ashen--with-colors (mode &rest body)
   "Execute `BODY' in a scope with variables bound to the various tomorrow colors.
 
 Also sets background-mode to either `light' or `dark', for use in
 setting `frame-background-mode'.
 
 `MODE' should be set to either `day', `night'."
-  `(let* ((colors (or (cdr (assoc ,mode rose-pine-colors))
-                      (error "no such theme flavor")))
+  `(let* ((colors (ashen--palette ,mode))
           (background      (cdr (assoc 'background colors)))
           (contrast-bg     (cdr (assoc 'selection colors)))
           (highlight       (cdr (assoc 'current-line colors)))
@@ -174,7 +239,7 @@ setting `frame-background-mode'.
           (background-mode (if (eq ,mode 'day) 'light 'dark)))
      ,@body))
 
-(defmacro rose-pine--face-specs ()
+(defmacro ashen--face-specs ()
   "Return a backquote which defines a list of face specs.
 
 It expects to be evaluated in a scope in which the various color
@@ -1917,20 +1982,20 @@ names to which it refers are bound."
 
 
 (eval-and-compile
-  (defun rose-pine--theme-name (mode)
-    (intern (format "rose-pine-%s" (symbol-name mode)))))
+  (defun ashen--theme-name (mode)
+    (intern (format "ashen-%s" (symbol-name mode)))))
 
-(defmacro rose-pine--define-theme (mode)
+(defmacro ashen--define-theme (mode)
   "Define a theme for the tomorrow variant `MODE'."
-  (let ((name (rose-pine--theme-name mode))
+  (let ((name (ashen--theme-name mode))
         (doc (format "A version of Chris Kempson's 'Tomorrow' theme (%s version)" mode)))
     `(progn
        (deftheme ,name ,doc)
        (put ',name 'theme-immediate t)
-       (rose-pine--with-colors
+       (ashen--with-colors
         ',mode
         (apply 'custom-theme-set-faces ',name
-               (rose-pine--face-specs))
+               (ashen--face-specs))
         (custom-theme-set-variables
          ',name
          `(frame-background-mode ',background-mode)
@@ -1963,9 +2028,9 @@ names to which it refers are bound."
          ))
        (provide-theme ',name))))
 
-(defun rose-pine (variant)
+(defun ashen (variant)
   "Apply the given tomorrow theme VARIANT, e.g. `night'."
-  (let ((name (rose-pine--theme-name variant)))
+  (let ((name (ashen--theme-name variant)))
     (custom-set-variables `(custom-enabled-themes '(,name)))))
 
 ;;;###autoload
@@ -1974,21 +2039,17 @@ names to which it refers are bound."
                (file-name-as-directory (file-name-directory load-file-name))))
 
 ;;;###autoload
-(defun rose-pine-night ()
+(defun ashen-night ()
   "Apply the tomorrow night theme."
   (interactive)
-  (rose-pine 'night))
+  (ashen 'night))
 
 ;;;###autoload
-(defun rose-pine-day ()
+(defun ashen-day ()
   "Apply the tomorrow day theme."
   (interactive)
-  (rose-pine 'day))
+  (ashen 'day))
 
-(provide 'rose-pine)
+(provide 'ashen)
 
-;; Local Variables:
-;; byte-compile-warnings: (not cl-functions)
-;; End:
-
-;;; rose-pine.el ends here
+;;; ashen.el ends here
