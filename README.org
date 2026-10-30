@@ -57,7 +57,7 @@ Or programmatically:
 * Customization
 Each variant has its own palette.  The main semantic keys are:
 
-- =background=, =alt-background=, =current-line=, =selection=
+- =background=, =alt-background=, =current-line=, =selection=, =region=
 - =foreground=, =comment=
 - =rose=, =gold=, =love=, =amber=, =leaf=, =foam=, =pine=, =iris=
 
